@@ -12,7 +12,8 @@
                 "https://thunderstore.io/c/*",
                 "https://thunderstore.io/",
                 "https://thunderstore.io/settings/*",
-                "https://thunderstore.io/packages/*"
+                "https://thunderstore.io/packages/*",
+                "https://thunderstore.io/package/*"
             ],
             "js": [
                 "content.js"
