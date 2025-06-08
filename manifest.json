@@ -1,0 +1,30 @@
+{
+    "manifest_version": 3,
+    "name": "Thunderstore - Dark Blue Theme",
+    "version": "1.0.0",
+    "description": "Changes the thunderstore site to be a dark blue theme.",
+    "content_scripts": [
+        {
+            "matches": [
+                "https://thunderstore.io/c/*",
+                "https://thunderstore.io/",
+                "https://thunderstore.io/settings/*",
+                "https://thunderstore.io/packages/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "style.css"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}
