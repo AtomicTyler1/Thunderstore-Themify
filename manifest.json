@@ -3,6 +3,9 @@
     "name": "Thunderstore - Dark Blue Theme",
     "version": "1.0.0",
     "description": "Changes the thunderstore site to be a dark blue theme.",
+    "icons": {
+        "256": "Icon.png"
+    },
     "content_scripts": [
         {
             "matches": [
