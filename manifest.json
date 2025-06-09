@@ -1,34 +1,32 @@
 {
-    "manifest_version": 3,
-    "name": "Thunderstore - Dark Blue Theme",
-    "version": "1.0.0",
-    "description": "Changes the thunderstore site to be a dark blue theme.",
-    "icons": {
-        "256": "Icon.png"
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "https://thunderstore.io/c/*",
-                "https://thunderstore.io/",
-                "https://thunderstore.io/settings/*",
-                "https://thunderstore.io/packages/*",
-                "https://thunderstore.io/package/*"
-            ],
-            "js": [
-                "content.js"
-            ],
-            "run_at": "document_start"
-        }
-    ],
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "style.css"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ]
+  "manifest_version": 3,
+  "name": "Thunderstore - Theme Switcher",
+  "version": "1.1.0",
+  "description": "Customize Thunderstore theme and background.",
+  "icons": {
+    "256": "Icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://thunderstore.io/c/*",
+        "https://thunderstore.io/",
+        "https://thunderstore.io/settings/*",
+        "https://thunderstore.io/packages/*",
+        "https://thunderstore.io/package/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "style-default.css",
+        "style-dark-blue.css",
+        "Icon.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
