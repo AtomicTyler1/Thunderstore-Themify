@@ -1,25 +1,79 @@
-const THEMES = {
-  default: { file: 'style-default.css', label: 'Default' },
-  'dark-blue': { file: 'style-dark-blue.css', label: 'Dark Blue' },
-};
+let THEMES = {};
+let THEME_OPTIONS = [];
 
 const selectedTheme = localStorage.getItem('ts_theme') || 'dark-blue';
 
-function injectThemeCss(themeKey) {
-  const theme = THEMES[themeKey] || THEMES.default;
-  const cssPath = theme.file;
-  fetch(chrome.runtime.getURL(cssPath))
-    .then(res => res.text())
-    .then(css => {
-      const style = document.createElement('style');
-      style.textContent = css;
-      document.head.appendChild(style);
-    })
-    .catch(console.error);
+async function loadThemeIndex() {
+  try {
+    const jsonUrl = chrome.runtime.getURL('theme-index.json');
+    console.log('Loading theme index from:', jsonUrl);
+
+    const response = await fetch(jsonUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const themeData = await response.json();
+    console.log('Theme data loaded:', themeData);
+
+    THEMES = themeData.themes || {};
+    THEME_OPTIONS = themeData.options || [];
+
+    if (THEME_OPTIONS.length === 0) {
+      THEME_OPTIONS = Object.keys(THEMES).map(key => ({
+        value: key,
+        label: key.charAt(0).toUpperCase() + key.slice(1).replace('-', ' ')
+      }));
+    }
+
+    console.log('Final THEMES:', THEMES);
+    console.log('Final THEME_OPTIONS:', THEME_OPTIONS);
+    return true;
+  } catch (error) {
+    console.error('Failed to load theme index:', error);
+  }
 }
 
-injectThemeCss(selectedTheme);
+function injectThemeCss(themeKey) {
+  const cssPath = THEMES[themeKey] || THEMES.default || Object.values(THEMES)[0];
+  if (!cssPath) {
+    console.error('No theme CSS path found for:', themeKey);
+    return;
+  }
 
+  const cssUrl = chrome.runtime.getURL(cssPath);
+  console.log('Loading CSS from:', cssUrl);
+
+  fetch(cssUrl)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return res.text();
+    })
+    .then(css => {
+      const existingStyle = document.getElementById('thunderstore-theme-style');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+
+      const style = document.createElement('style');
+      style.id = 'thunderstore-theme-style';
+      style.textContent = css;
+      document.head.appendChild(style);
+      console.log('Theme CSS injected successfully for:', themeKey);
+    })
+    .catch(error => {
+      console.error('Failed to load theme CSS:', error);
+      console.error('Attempted URL:', cssUrl);
+      console.error('Theme key:', themeKey);
+      console.error('CSS path:', cssPath);
+    });
+}
+
+loadThemeIndex().then(() => {
+  injectThemeCss(selectedTheme);
+});
 
 function waitForElement(selector, callback) {
   const el = document.querySelector(selector);
@@ -30,24 +84,28 @@ function waitForElement(selector, callback) {
   }
 }
 
-waitForElement('.navbar-nav.ml-auto', navbar => {
-  if (document.getElementById('themeSettingsButton')) return;
+loadThemeIndex().then(() => {
+  injectThemeCss(selectedTheme);
 
-  const li = document.createElement('li');
-  li.className = 'nav-item';
+  waitForElement('.navbar-nav.ml-auto', navbar => {
+    if (document.getElementById('themeSettingsButton')) return;
 
-  const btn = document.createElement('a');
-  btn.href = '#';
-  btn.className = 'nav-link';
-  btn.id = 'themeSettingsButton';
-  btn.textContent = 'Theme Settings';
-  btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    showThemeModal();
+    const li = document.createElement('li');
+    li.className = 'nav-item';
+
+    const btn = document.createElement('a');
+    btn.href = '#';
+    btn.className = 'nav-link';
+    btn.id = 'themeSettingsButton';
+    btn.textContent = 'Theme Settings';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showThemeModal();
+    });
+
+    li.appendChild(btn);
+    navbar.insertBefore(li, navbar.querySelector('li.nav-item:last-child'));
   });
-
-  li.appendChild(btn);
-  navbar.insertBefore(li, navbar.querySelector('li.nav-item:last-child'));
 });
 
 function createCustomDropdown(container, selectedValue, options, onSelect) {
@@ -63,7 +121,7 @@ function createCustomDropdown(container, selectedValue, options, onSelect) {
   trigger.style.cssText = `
     width: 100%;
     padding: 12px 16px;
-    background: hsla(221, 49.20%, 25.50%, 0.47);
+    background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
     color: white;
@@ -95,6 +153,10 @@ function createCustomDropdown(container, selectedValue, options, onSelect) {
 
   const optionsContainer = document.createElement('div');
   optionsContainer.className = 'dropdown-options';
+  const maxVisibleOptions = 5;
+  const shouldScroll = options.length > maxVisibleOptions;
+  const containerHeight = shouldScroll ? `${maxVisibleOptions * 44}px` : 'auto';
+
   optionsContainer.style.cssText = `
     position: absolute;
     top: 100%;
@@ -106,13 +168,49 @@ function createCustomDropdown(container, selectedValue, options, onSelect) {
     margin-top: 4px;
     backdrop-filter: blur(20px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
+    z-index: 10000;
     overflow: hidden;
     opacity: 0;
     transform: translateY(-10px) scale(0.95);
     pointer-events: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: ${containerHeight};
   `;
+
+  const scrollableContent = document.createElement('div');
+  scrollableContent.style.cssText = `
+    max-height: ${containerHeight};
+    overflow-y: ${shouldScroll ? 'auto' : 'visible'};
+    overflow-x: hidden;
+  `;
+
+  if (shouldScroll) {
+    scrollableContent.style.cssText += `
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    `;
+
+    if (!document.getElementById('dropdownScrollbarStyle')) {
+      const scrollbarStyle = document.createElement('style');
+      scrollbarStyle.id = 'dropdownScrollbarStyle';
+      scrollbarStyle.textContent = `
+        .dropdown-options div::-webkit-scrollbar {
+          width: 6px;
+        }
+        .dropdown-options div::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .dropdown-options div::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 3px;
+        }
+        .dropdown-options div::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.5);
+        }
+      `;
+      document.head.appendChild(scrollbarStyle);
+    }
+  }
 
   options.forEach((option, index) => {
     const optionEl = document.createElement('div');
@@ -129,6 +227,9 @@ function createCustomDropdown(container, selectedValue, options, onSelect) {
       opacity: 0;
       transform: translateY(-5px);
       transition-delay: ${index * 0.05}s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
     `;
 
     if (option.value === selectedValue) {
@@ -153,8 +254,10 @@ function createCustomDropdown(container, selectedValue, options, onSelect) {
       onSelect(option.value);
     });
 
-    optionsContainer.appendChild(optionEl);
+    scrollableContent.appendChild(optionEl);
   });
+
+  optionsContainer.appendChild(scrollableContent);
 
   let isOpen = false;
 
@@ -170,7 +273,7 @@ function createCustomDropdown(container, selectedValue, options, onSelect) {
     optionsContainer.style.opacity = '1';
     optionsContainer.style.transform = 'translateY(0) scale(1)';
 
-    const optionElements = optionsContainer.querySelectorAll('.dropdown-option');
+    const optionElements = scrollableContent.querySelectorAll('.dropdown-option');
     optionElements.forEach((opt, index) => {
       setTimeout(() => {
         opt.style.opacity = '1';
@@ -191,7 +294,7 @@ function createCustomDropdown(container, selectedValue, options, onSelect) {
     trigger.style.borderColor = 'rgba(255, 255, 255, 0.3)';
     trigger.style.background = 'rgba(255, 255, 255, 0.2)';
 
-    const optionElements = optionsContainer.querySelectorAll('.dropdown-option');
+    const optionElements = scrollableContent.querySelectorAll('.dropdown-option');
     optionElements.forEach((opt, index) => {
       setTimeout(() => {
         opt.style.opacity = '0';
@@ -249,8 +352,8 @@ function showThemeModal() {
   const modal = document.createElement('div');
   modal.id = 'themeModal';
   modal.style.cssText = `
-    background: hsla(221, 49.2%, 25.5%, 0.47);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     padding: 32px;
     width: 380px;
@@ -261,9 +364,8 @@ function showThemeModal() {
     backdrop-filter: blur(20px);
     animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
   `;
-
 
   const headerGradient = document.createElement('div');
   headerGradient.style.cssText = `
@@ -283,8 +385,8 @@ function showThemeModal() {
   const header = document.createElement('div');
   header.style.cssText = 'text-align: center; margin-bottom: 28px;';
   header.innerHTML = `
-    <div style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.15); border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.2); overflow: hidden;">
-      <img src="${chrome.runtime.getURL('Icon.png')}" alt="Icon" style="width: 32px; height: 32px;" />
+    <div style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.15); border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.2);">
+      <img src="${chrome.runtime.getURL('Icon.png')}" alt="Icon" style="width: 24px; height: 24px;" />
     </div>
     <h2 style="margin: 0; font-size: 24px; font-weight: 700; background: linear-gradient(45deg, #ffffff, #e0e7ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Theme Settings</h2>
     <p style="margin: 4px 0 0; font-size: 14px; opacity: 0.8; font-weight: 400;">Customize your Thunderstore experience</p>
@@ -311,23 +413,46 @@ function showThemeModal() {
 
   let selectedThemeValue = selectedTheme;
 
-  const dropdownOptions = Object.entries(THEMES).map(([key, data]) => ({
-    value: key,
-    label: data.label
-  }));
-
   const dropdown = createCustomDropdown(
     themeSection,
     selectedTheme,
-    dropdownOptions,
+    THEME_OPTIONS,
     (value) => {
       selectedThemeValue = value;
+      updateCreditsDisplay();
     }
   );
+  const creditsSection = document.createElement('div');
+  creditsSection.id = 'themeCredits';
+  creditsSection.style.cssText = `
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    display: none;
+  `;
 
+  function updateCreditsDisplay() {
+    const selectedOption = THEME_OPTIONS.find(opt => opt.value === selectedThemeValue);
+    const credits = selectedOption?.credits;
+    
+    if (credits) {
+      creditsSection.innerHTML = `<strong style="color: rgba(255, 255, 255, 0.9);">Theme credits:</strong> ${credits}`;
+      creditsSection.style.display = 'block';
+    } else {
+      creditsSection.style.display = 'none';
+    }
+  }
+
+  updateCreditsDisplay();
 
   themeSection.appendChild(sectionLabel);
   themeSection.appendChild(dropdown);
+  themeSection.appendChild(creditsSection);
 
   const buttons = document.createElement('div');
   buttons.style.cssText = 'display: flex; gap: 12px; margin-top: 28px;';
@@ -365,10 +490,6 @@ function showThemeModal() {
     transition: all 0.2s ease;
   `;
 
-  const footer = document.createElement('div');
-  footer.textContent = 'Made by @atomictyler - MIT License';
-  footer.style.cssText = 'text-align: center; font-size: 12px; opacity: 0.6; margin-top: 16px;';
-
   cancelBtn.addEventListener('mouseenter', () => {
     cancelBtn.style.background = 'rgba(255, 255, 255, 0.15)';
     cancelBtn.style.transform = 'translateY(-1px)';
@@ -398,10 +519,8 @@ function showThemeModal() {
 
   modal.appendChild(headerGradient);
   modal.appendChild(content);
-  modal.appendChild(footer);
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
-  
 
   overlay.addEventListener('click', e => {
     if (e.target === overlay) {

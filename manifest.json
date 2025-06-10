@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Thunderstore - Theme Switcher",
+  "name": "Thunderstore Themify",
   "version": "1.1.0",
-  "description": "Customize Thunderstore theme and background.",
+  "description": "An easy to use theme extension for thunderstore!",
   "icons": {
     "256": "Icon.png"
   },
@@ -22,9 +22,12 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "style-default.css",
-        "style-dark-blue.css",
-        "Icon.png"
+        "Icon.png",
+        "theme-styles",
+        "theme-index.json",
+        "theme-styles/theme-dark-blue.css",
+        "theme-styles/theme-default.css",
+        "theme-styles/theme-red.css"
       ],
       "matches": ["<all_urls>"]
     }
