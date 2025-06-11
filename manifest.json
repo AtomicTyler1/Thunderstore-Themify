@@ -13,7 +13,8 @@
         "https://thunderstore.io/",
         "https://thunderstore.io/settings/*",
         "https://thunderstore.io/packages/*",
-        "https://thunderstore.io/package/*"
+        "https://thunderstore.io/package/*",
+        "https://thunderstore.io/tools/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
