@@ -44,6 +44,9 @@ You can use [this example](https://thunderstore.io/c/lethal-company/p/AtomicStud
 Once you're happy with the result:
 - Copy and save your final CSS code — you’ll need this for the next step.
 
+Not good with instructions? Follow this non speech guide, this may change if a member submits a better one.
+[![Watch the video](https://raw.githubusercontent.com/AtomicTyler1/Thunderstore-Themify/main/videos/thumbnail/Making-css.png)](https://raw.githubusercontent.com/AtomicTyler1/Thunderstore-Themify/main/videos/Making-a-theme-basics.mp4)
+
 |                            | Making a Custom CSS | Forking the Repo | Adding Your Theme | Submitting Merge Request |
 |:--------------------------:|:-------------------:|:----------------:|:------------------:|:--------------------------:|
 | **Step Completed?**        |          ✅         |        ❌         |         ❌         |             ❌             |
@@ -129,6 +132,9 @@ The file should look like this but perhaps with extra lines:
 - Avoid using a name already taken by another theme.
 - Do NOT attempt to change the credits of an existing theme contact me @atomictyler on discord to discuss credit changes.
 - Don’t forget commas between entries, except after the final one.
+
+Not good with instructions? Follow the video guide below. (No speech)
+[![Watch the video](https://raw.githubusercontent.com/AtomicTyler1/Thunderstore-Themify/main/videos/thumbnail/Uploading-theme.png)](https://raw.githubusercontent.com/AtomicTyler1/Thunderstore-Themify/main/videos/Testing-and-adding-your-theme.mp4)
 
 |                            | Making a Custom CSS | Forking the Repo | Adding Your Theme | Submitting Merge Request |
 |:--------------------------:|:-------------------:|:----------------:|:------------------:|:--------------------------:|
