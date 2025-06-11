@@ -3,11 +3,24 @@
 This is a Chrome extension developed by me (@atomictyler) and released completely for free.  
 It allows you to choose from a selection of premade themes for Thunderstore to customize your browsing experience.
 
-**Made your own theme?** Submit a merge request! If it follows the contribution guidelines, it may be added to the official collection.
+**This extension uses a custom license. See LICENSE for more details.**
 
-Licensed under the MIT license. Please submit merge requests instead of creating separate extensions per theme. You can include credit for your theme in the theme-index.json!
+**Made your own theme?** Submit a merge request! If it follows the contribution guidelines, it may be added to the official collection add your own credits too!
 
 ---
+
+## How to install thundestore themify
+
+If the chrome extension isn't on the chrome web store, this is the only official place to get it from.
+
+Step 1: Downloading the repository
+Step 2: Unpacking the repository
+Step 3: Go to your browsers extension page
+Step 4: Turn on developer mode
+Step 5: Press Load unpacked or similar
+Step 6: Select the downloaded repo and use it!
+
+**It's**
 
 ## Making Your Own Theme
 
