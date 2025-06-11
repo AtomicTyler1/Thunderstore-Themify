@@ -175,8 +175,9 @@ Include the following in your PR description:
 ## Notes
 
 - Make sure your theme works across various Thunderstore pages.
-- Keep your CSS scoped — avoid affecting unrelated UI components.
-- Comment your CSS if needed for clarity.
-- If your theme breaks core functionality, it won’t be accepted.
+- Paste the entire css, this is just how the script works.
+- Do NOT edit `content.js` if uploading a theme.
+- Do not change peoples credits. You must verify you are the same person if you want to.
+- Do not copy an entire theme and claim it as your own.
 
 ---
