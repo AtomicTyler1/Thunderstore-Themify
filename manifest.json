@@ -27,6 +27,7 @@
         "theme-index.json",
         "theme-styles/theme-dark-blue.css",
         "theme-styles/theme-default.css",
+        "theme-styles/theme-midnight-purple.css",
         "theme-styles/theme-red.css"
       ],
       "matches": ["<all_urls>"]

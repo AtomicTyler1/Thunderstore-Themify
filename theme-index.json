@@ -2,11 +2,13 @@
   "themes": {
     "default": "theme-styles/theme-default.css",
     "dark-blue": "theme-styles/theme-dark-blue.css",
+    "midnight-purple": "theme-styles/theme-midnight-purple.css",
     "red": "theme-styles/theme-red.css"
   },
   "options": [
     { "value": "default", "label": "Default", "credits": "thunderstore.io" },
     { "value": "dark-blue", "label": "Dark Blue", "credits": "@atomictyler" },
+    { "value": "midnight-purple", "label": "Midnight purple", "credits": "@atomictyler" },
     { "value": "red", "label": "Red", "credits": "@atomictyler" }
   ]
 }
